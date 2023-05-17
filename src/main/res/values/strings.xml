@@ -1,0 +1,9 @@
+<resources>
+    <string name="app_name">Trachtenberg</string>
+    <string name="wrong">Wrong</string>
+    <string name="correct">Correct</string>
+    <string name="pref_hint_off">OFF</string>
+    <string name="pref_hint_on">ON</string>
+    <string name="next">N\nE\nX\nT</string>
+    <string name="back">B\nA\nC\nK</string>
+</resources>

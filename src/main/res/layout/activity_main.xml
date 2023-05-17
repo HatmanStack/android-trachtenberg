@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout  xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="portfolio.trachtenberg.LearnActivity">
+
+
+    <TextView
+        android:id="@+id/explanation_text"
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="50dp"
+        android:textAlignment="center"
+        android:textColor="@color/colorPrimaryDark"
+        app:layout_constraintBottom_toTopOf="@+id/equation_text"
+        app:layout_constraintEnd_toStartOf="@+id/next_button"
+        app:layout_constraintStart_toEndOf="@+id/back_button"
+        app:layout_constraintTop_toTopOf="parent"
+        app:layout_constraintVertical_chainStyle="spread_inside"
+        tools:text="explanation_text" />
+
+    <TextView
+        android:id="@+id/equation_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/colorPrimaryDark"
+        android:textAlignment="center"
+        app:layout_constraintBottom_toTopOf="@+id/bottom_arrow"
+        app:layout_constraintEnd_toEndOf="@+id/explanation_text"
+        app:layout_constraintStart_toStartOf="@+id/explanation_text"
+        app:layout_constraintTop_toBottomOf="@+id/explanation_text"
+        tools:text="equation_text" />
+
+    <TextView
+        android:id="@+id/bottom_arrow"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:textColor="@color/colorPrimaryDark"
+        android:textAlignment="center"
+        app:layout_constraintBottom_toTopOf="@+id/answer_text"
+        app:layout_constraintEnd_toEndOf="@+id/explanation_text"
+        app:layout_constraintStart_toStartOf="@+id/explanation_text"
+        app:layout_constraintTop_toBottomOf="@+id/equation_text"
+        tools:text="bottom_arrow" />
+
+    <TextView
+        android:id="@+id/answer_text"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="50dp"
+        android:textAlignment="center"
+        android:textColor="@color/colorPrimaryDark"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="@+id/explanation_text"
+        app:layout_constraintStart_toStartOf="@+id/explanation_text"
+        app:layout_constraintTop_toBottomOf="@+id/bottom_arrow"
+        tools:text="answer_text" />
+
+    <Button
+        android:id="@+id/next_button"
+        android:layout_width="50dp"
+        android:layout_height="wrap_content"
+        android:background="@android:color/transparent"
+        android:onClick="learnTrach"
+        android:tag="add"
+        android:text="@string/next"
+        android:textColor="@color/colorPrimaryDark"
+        android:textIsSelectable="false"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+
+    <Button
+        android:id="@+id/back_button"
+        android:layout_width="50dp"
+        android:layout_height="wrap_content"
+        android:onClick="learnTrach"
+        android:tag="minus"
+        android:text="@string/back"
+        android:background="@android:color/transparent"
+        android:textColor="@color/colorPrimaryDark"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent" />
+</androidx.constraintlayout.widget.ConstraintLayout>

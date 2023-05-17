@@ -1,0 +1,45 @@
+<?xml version="1.0" encoding="utf-8"?>
+<manifest xmlns:android="http://schemas.android.com/apk/res/android"
+    package="portfolio.math.trachtenberg">
+
+    <application
+        android:icon="@mipmap/launcher"
+        android:label="@string/app_name"
+        android:allowBackup="true"
+        android:roundIcon="@mipmap/launcher_round"
+        android:supportsRtl="true"
+        android:theme="@style/AppTheme.SettingsTheme">
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="ca-app-pub-6173744039687391~7033034874"/>
+        <activity
+            android:name="portfolio.trachtenberg.PracticeActivity"
+            android:label="Practice"
+            android:parentActivityName="portfolio.trachtenberg.LearnActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="portfolio.trachtenberg.LearnActivity" />
+
+        </activity>
+        <activity
+            android:name="portfolio.trachtenberg.SettingsActivity"
+            android:label="SetUp"
+            android:parentActivityName="portfolio.trachtenberg.PracticeActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="portfolio.trachtenberg.PracticeActivity"/>
+        </activity>
+        <activity android:name="portfolio.trachtenberg.LearnActivity"
+            android:launchMode="singleTop">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW"/>
+            </intent-filter>
+        </activity>
+    </application>
+
+</manifest>
