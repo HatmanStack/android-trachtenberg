@@ -4,11 +4,7 @@ An educational app to teach the Trachtenberg method of multiplication, a system 
 
 ## Demo
 
-Click [here](https://www.youtube.com/watch?v=jQsc5obbgzo) to access the demo.
-
-## Installation
-
-You can download the application from the Google Play Store by clicking [here](https://play.google.com/store/apps/details?id=trachtenberg.math.trachtenberg).
+Click [here](https://www.youtube.com/watch?v=jQsc5obbgzo) for the Youtube demo. You can download the application from the Google Play Store by clicking [here](https://play.google.com/store/apps/details?id=trachtenberg.math.trachtenberg).
 
 ## Features
 
@@ -16,7 +12,7 @@ You can download the application from the Google Play Store by clicking [here](h
 <li>Tutorials that explain the Trachtenberg method in detail</li>
 <li>Practice problems</li>
 <li>Hints that can be turned on or off to help users learn the method</li>
-<li>Ad-free (test ads are served as a POC)</li>
+<li>Ad-free (test ads are served as a Proof Of Concept)</li>
 </ul>
 
 ## Technologies
@@ -24,6 +20,7 @@ You can download the application from the Google Play Store by clicking [here](h
 <ul>
 <li>Java</li>
 <li>Android SDK</li>
+<li>Trachtenberg Methodology</li>
 </ul>
 
 ## Screenshots
