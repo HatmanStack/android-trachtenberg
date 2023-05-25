@@ -60,17 +60,18 @@ public class PracticeActivity extends AppCompatActivity implements
     private Random mRnd;
     public SharedPreferences sharedPreferences;
 
-
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        
+        // Get the device display
         Display d = getWindowManager().getDefaultDisplay();
-        if(d.getRotation() == Surface.ROTATION_0 || d.getRotation() == Surface.ROTATION_180) {
-            setContentView(R.layout.activity_practice);
-        }else {
-            setContentView(R.layout.activity_practice_90);
-        }
+        
+        // Set the content view based on the device rotation
+        int layoutId = (d.getRotation() == Surface.ROTATION_0 || d.getRotation() == Surface.ROTATION_180) ? R.layout.activity_main_rotated : R.layout.activity_main;
+        setContentView(layoutId);
+        
+        // Find the necessary views and initialize variables
         button = findViewById(R.id.button);
         button1 = findViewById(R.id.button2);
         button2 = findViewById(R.id.button3);
@@ -80,16 +81,15 @@ public class PracticeActivity extends AppCompatActivity implements
         buttonResultTextView = findViewById(R.id.button_result);
         hintResultTextView = findViewById(R.id.hint_result);
         hintQuestionTextView = findViewById(R.id.hint_question);
-
         MobileAds.initialize(this, "ca-app-pub-6173744039687391~7033034874");
-        //ca-app-pub-3940256099942544/6300978111
         AdView mAdView = findViewById(R.id.adView);
         AdRequest adRequest = new AdRequest.Builder().build();
         mAdView.loadAd(adRequest);
-
         mRnd = new Random();
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         sharedPreferences.registerOnSharedPreferenceChangeListener(this);
+        
+        // Retrieve instance state (if any) and update views accordingly
         if (savedInstanceState != null) {
             indexCount = savedInstanceState.getInt(INDEX_COUNT, 0);
             equationString = savedInstanceState.getString(EQUATION, "");
@@ -108,6 +108,8 @@ public class PracticeActivity extends AppCompatActivity implements
         } else {
             getEquation();
         }
+    
+        // Set up the back button display
         ActionBar actionBar = getSupportActionBar();
         if(actionBar != null) {
             actionBar.setDisplayHomeAsUpEnabled(true);
@@ -130,6 +132,7 @@ public class PracticeActivity extends AppCompatActivity implements
         }
     }
 
+    // Gets a new equation to display to the user.
     public void getEquation() {
         int[] answer = operatorEquation();
         indexCount = 0;
@@ -138,148 +141,11 @@ public class PracticeActivity extends AppCompatActivity implements
         answerProgress.setText("");
         answerString = String.valueOf(answer[0] * answer[1]);
         equationString = answer[0] + " * " + answer[1];
-        sharedPreferences.edit().putString(EQUATION, equationString).apply();
         equationTextView.setText(equationString);
         buttonQuestion();
+        sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
+        sharedPreferences.edit().putInt(INDEX_COUNT, 0).apply();
         setMove();
-    }
-
-    public void buttonQuestion() {
-        answerIndex = mRnd.nextInt(4);
-        int[] buttonAnswers = new int[4];
-        for (int i = 0; i < buttonAnswers.length; i++) {
-            buttonAnswers[i] = -1;
-        }
-        int incorrect;
-        int answer = -1;
-        for (int i = 0; i < 4; i++) {
-            if (i == answerIndex) {
-                answer = Integer.parseInt(answerString.substring(answerString.length() - 1 - indexCount, answerString.length() - indexCount));
-                buttonAnswers[i] = answer;
-            }
-        }
-        for (int i = 0; i < buttonAnswers.length; i++) {
-            incorrect = mRnd.nextInt(10);
-            while (incorrect == buttonAnswers[0] || incorrect == buttonAnswers[1] ||
-                    incorrect == buttonAnswers[2] || incorrect == buttonAnswers[3]) {
-                incorrect = mRnd.nextInt(10);
-            }
-            if(buttonAnswers[i] != answer && i != answerIndex) {
-                buttonAnswers[i] = incorrect;
-            }
-        }
-        button.setText(String.valueOf(buttonAnswers[0]));
-        button1.setText(String.valueOf(buttonAnswers[1]));
-        button2.setText(String.valueOf(buttonAnswers[2]));
-        button3.setText(String.valueOf(buttonAnswers[3]));
-    }
-
-
-    public void practiceHint(int fsIndex, int ssIndex){
-        String firstString = String.valueOf(equationTextView.getText().toString().split(" * ")[0]);
-        String secondString = String.valueOf(equationTextView.getText().toString().split(" * ")[2]);
-
-        String firstStringChar = String.valueOf(firstString.charAt(fsIndex));
-        String secondStringChar = String.valueOf(secondString.charAt(ssIndex));
-
-        String questionString = firstStringChar + " * " + secondStringChar;
-        hintQuestionTextView.setText(questionString);
-        if(sharedPreferences.getBoolean(HINT, false)){
-            SpannableString sbFirst = new SpannableString(equationTextView.getText().toString());
-            sbFirst.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.colorAccent)), fsIndex,
-                    fsIndex + 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-            sbFirst.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.colorAccent)), ssIndex + 7,
-                    ssIndex + 8, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
-            equationTextView.setText(sbFirst);
-        }else {
-            equationTextView.setText(equationString);
-        }
-
-        String result = Integer.valueOf(firstStringChar) * Integer.valueOf(secondStringChar) + "";
-        if(result.length() == 1){
-            result = "0" + result;
-        }
-
-        String charResultString;
-        if(move == 0 || move == 1 || move == 3 || move == 4 || move == 6 || move == 8 || move == 9 || move == 11 || move == 13
-                || move == 16 || move == 18 || move == 21 ){
-            charResultString = result.substring(1);
-        } else {
-            charResultString = result.substring(0, 1);
-        }
-        remainderHint += Integer.valueOf(charResultString);
-        charResultString = charResultString + " + ";
-        if(move == 0 || move == 3 || move == 8 || move == 14 || move == 19 || move == 22 || move == 23){
-            charResultString = charResultString.replace(" + ", "");
-        }
-        charResultString = hintResultTextView.getText().toString() + charResultString;
-        hintResultTextView.setText(charResultString);
-
-        move ++;
-    }
-
-    public void nextHint(View v){
-        if(moveCount > move) {
-            setIndex();
-        }
-    }
-
-    public void setIndex(){
-        int fsIndex = 3;
-        int ssIndex = 2;
-        if(move == 1 || move == 5){
-            if(move == 1 && sharedPreferences.getBoolean(HINTHELP, true)){
-                Toast.makeText(this, "Touch hint to get next Step", Toast.LENGTH_SHORT).show();
-                sharedPreferences.edit().putBoolean(HINTHELP, false).apply();
-            }
-            fsIndex = 2;
-            ssIndex = 2;
-        }
-        if(move == 0 || move == 2){
-            fsIndex = 3;
-            ssIndex = 2;
-        }
-        if(move == 3 || move == 7){
-            fsIndex = 3;
-            ssIndex = 1;
-        }
-        if(move == 4 || move == 10){
-            fsIndex = 1;
-            ssIndex = 2;
-        }
-        if(move == 6 || move == 12){
-            fsIndex = 2;
-            ssIndex = 1;
-        }
-        if(move == 8 || move == 14){
-            fsIndex = 3;
-            ssIndex = 0;
-        }
-        if(move == 9 || move == 15){
-            fsIndex = 0;
-            ssIndex = 2;
-        }
-        if(move == 11 || move == 17){
-            fsIndex = 1;
-            ssIndex = 1;
-        }
-        if(move == 13 || move == 19){
-            fsIndex = 2;
-            ssIndex = 0;
-        }
-        if(move == 16 || move == 20){
-            fsIndex = 0;
-            ssIndex = 1;
-        }
-        if(move == 18 || move == 22){
-            fsIndex = 1;
-            ssIndex = 0;
-        }
-        if(move == 21 || move == 23){
-            fsIndex = 0;
-            ssIndex = 0;
-        }
-        practiceHint(fsIndex, ssIndex);
     }
 
     public int[] operatorEquation(){
@@ -293,82 +159,213 @@ public class PracticeActivity extends AppCompatActivity implements
         return components;
     }
 
-    @Override
-    protected void onDestroy(){
-        super.onDestroy();
-        PreferenceManager.getDefaultSharedPreferences(this)
-                .unregisterOnSharedPreferenceChangeListener(this);
+
+    // Method for setting up four random answer choices for a multiple choice question
+    public void buttonQuestion() {
+        answerIndex = mRnd.nextInt(4); // Choose a random index for the correct answer
+        int[] buttonAnswers = new int[4]; // Create an array for the answer choices
+        Arrays.fill(buttonAnswers, -1); // Initialize array with -1
+        int incorrect; 
+        int answer = -1;
+        for (int i = 0; i < 4; i++) { // Loop through the answer choices
+            if (i == answerIndex) {
+                answer = Integer.parseInt(
+                    answerString.substring(answerString.length() - 1 - indexCount, answerString.length() - indexCount));
+                buttonAnswers[i] = answer; // Assign correct answer to indexed button
+            }
+        }
+        for (int i = 0; i < buttonAnswers.length; i++) { // Loop through the answer choices again
+            incorrect = mRnd.nextInt(10);
+            while (incorrect == buttonAnswers[0] || incorrect == buttonAnswers[1] ||
+                    incorrect == buttonAnswers[2] || incorrect == buttonAnswers[3]) { // Ensure that incorrect answer is distinct from the correct answer
+                incorrect = mRnd.nextInt(10);
+            }
+            if (buttonAnswers[i] != answer && i != answerIndex) { // Check if this button is neither assigned nor the correct answer
+                buttonAnswers[i] = incorrect; // Assign random incorrect answer to button
+            }
+        }
+        // Update button text with assigned answers
+        button.setText(String.valueOf(buttonAnswers[0]));
+        button1.setText(String.valueOf(buttonAnswers[1]));
+        button2.setText(String.valueOf(buttonAnswers[2]));
+        button3.setText(String.valueOf(buttonAnswers[3]));
     }
 
-    public void setMove(){
-        if(indexCount == 1){
-            move = 1;
-            moveCount = 4;
+    // Method for setting up hints for a multiplication practice session
+    public void practiceHint(int fsIndex, int ssIndex) {
+        // Extract values to multiply
+        String firstString = String.valueOf(equationTextView.getText().toString().split(" * ")[0]);
+        String secondString = String.valueOf(equationTextView.getText().toString().split(" * ")[2]);
+
+        // Extract digits of the values
+        String firstStringChar = String.valueOf(firstString.charAt(fsIndex));
+        String secondStringChar = String.valueOf(secondString.charAt(ssIndex));
+
+        // Generate question text for hint
+        String questionString = firstStringChar + " * " + secondStringChar;
+        hintQuestionTextView.setText(questionString);
+
+        // Highlight digits in original equation for hint if preference is set to true
+        if (sharedPreferences.getBoolean(HINT, false)) {
+            SpannableString sbFirst = new SpannableString(equationTextView.getText().toString());
+            sbFirst.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.colorAccent)), fsIndex,
+                    fsIndex + 1, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            sbFirst.setSpan(new ForegroundColorSpan(getResources().getColor(R.color.colorAccent)), ssIndex + 7,
+                    ssIndex + 8, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE);
+            equationTextView.setText(sbFirst);
+        } else {
+            equationTextView.setText(equationString);
         }
-        if(indexCount == 2){
-            moveCount = 9;
-            move = 4;
+
+        // Compute the correct result and generate a hint string
+        String result = Integer.valueOf(firstStringChar) * Integer.valueOf(secondStringChar) + "";
+        if (result.length() == 1) {
+            result = "0" + result;
         }
-        if(indexCount == 3){
-            moveCount = 15;
-            move = 9;
+        String charResultString;
+        if (Arrays.asList(0, 1, 3, 4, 6, 8, 9, 11, 13, 16, 18, 21).contains(move)) {
+            charResultString = result.substring(1);
+        } else {
+            charResultString = result.substring(0, 1);
         }
-        if(indexCount == 4){
-            moveCount = 20;
-            move = 15;
+        remainderHint += Integer.valueOf(charResultString);
+
+        // Append hint string to current hint result text
+        charResultString = charResultString + " + ";
+        if (Arrays.asList(0, 3, 8, 14, 19, 22, 23).contains(move)) {
+            charResultString = charResultString.replace(" + ", "");
         }
-        if(indexCount == 5){
-            moveCount = 23;
-            move = 20;
-        }
-        if(indexCount == 6){
-            moveCount = 24;
-            move = 23;
-        }
-        if(sharedPreferences.getBoolean(HINT, false)) {
+        charResultString = hintResultTextView.getText().toString() + charResultString;
+        hintResultTextView.setText(charResultString);
+
+        // Update move counter
+        move++;
+    }
+
+    // Method to move to the next hint in a multiplication practice session
+    public void nextHint(View v) {
+        if (moveCount > move) {
             setIndex();
         }
     }
 
-    public void chooseAnswer(View v){
-        pickAnswer(v.getTag().toString());
+    //This method sets the value of fsIndex and ssIndex based on the value of "move".
+    public void setIndex() {
+        int fsIndex = 3; // Initialize fsIndex to 3
+        int ssIndex = 2; // Initialize ssIndex to 2
+        
+        int[] movesIndexes = {2, 2, 2, 1, 2, 1, 0, 2, 1, 0, 1, 0, 0}; // An array of move indexes
+        
+        // Iterate through the movesIndexes array
+        for (int i = 0; i < movesIndexes.length; i++) {
+            // If the value of "move" matches the current index or the current index plus 4
+            if (move == i || move == i + 4) {
+                // If the index is equal to the current index plus 4 and a hint has been seen, skip this iteration
+                if (move == i + 4 && sharedPreferences.getBoolean(HINT, false)) continue;
+                
+                // If the index is equal to 1 and the hint help has not been seen, show a toast message
+                if (move == 1 && sharedPreferences.getBoolean(HINTHELP, true)) {
+                    Toast.makeText(this, "Touch hint to get next Step", Toast.LENGTH_SHORT).show();
+                    sharedPreferences.edit().putBoolean(HINTHELP, false).apply();
+                }
+                
+                // Update fsIndex and ssIndex based on the current index
+                fsIndex = i > movesIndexes.length - 3 ? movesIndexes[movesIndexes.length - 2] - i % 2 : movesIndexes[i];
+                ssIndex = i < 6 ? 2 : i < 9 ? 1 : i < 11 ? 0 : movesIndexes[i + 1];
+                
+                // Call the practiceHint method with the updated fsIndex and ssIndex values
+                practiceHint(fsIndex, ssIndex);
+                
+                // Exit the loop
+                break;
+            }
+        }
     }
 
+    //This method sets the value of "move" based on the value of indexCount.
+    public void setMove() {
+        int[] movesCount = {0, 4, 9, 15, 20, 23, 24}; // An array of move counts
+        
+        // If the value of indexCount is greater than 0
+        if (indexCount > 0) {
+            // Iterate through the movesCount array starting from the second element
+            for (int i = 1; i < movesCount.length; i++) {
+                // If the value of indexCount matches the current element
+                if (indexCount == i) {
+                    // Set the value of "move" based on the previous element in the movesCount array
+                    move = movesCount[i - 1] != 0 ? movesCount[i - 1] : 1;
+                    
+                    // Set the value of moveCount based on the current element in the movesCount array minus 1
+                    moveCount = movesCount[i] - 1;
+                    
+                    // Exit the loop
+                    break;
+                }
+            }
+        }
+        
+        // If a hint has been seen, call the setIndex method
+        if (sharedPreferences.getBoolean(HINT, false)) {
+            setIndex();
+        }
+    }
+
+    public void chooseAnswer(View v) {
+        // calls the pickAnswer function with the tag of the button as a parameter
+        pickAnswer(v.getTag().toString());
+    }
+    
     public void pickAnswer(String buttonTag) {
+        // declares and initializes a Boolean variable to hold the answer status
         Boolean answerStatus;
+        
+        // checks if hint is enabled and button tag is not the correct answer
         if(sharedPreferences.getBoolean(HINT, false) && move < 9 && !buttonTag.equals(Integer.toString(answerIndex))){
+            // displays a toast message and returns if hint is not available
             Toast.makeText(this, "Touch the Hint to Receive More Hints", Toast.LENGTH_SHORT).show();
             return;
         }
-
+        
+        // checks if button tag is equal to the correct answer
         if (buttonTag.equals(Integer.toString(answerIndex))) {
+            // checks if hint is not available or if the user has made enough moves to use the hint
             if(!sharedPreferences.getBoolean(HINT, false) || moveCount > move) {
+                // sets the index to the correct answer index if hint is available
                 while (moveCount > move) {
                     setIndex();
                 }
             }
+            // declares and initializes a variable to hold the remainder hint string
             String remainderString = "";
+            // declares and initializes a variable to hold the first character of the remainder hint
             int firstCharRemainderHint = 0;
-            if(remainderHint > 9){
+            // constructs the remainder hint string and gets the first character of the remainder hint
+            if(remainderHint > 9) {
                 remainderString = String.valueOf(remainderHint).substring(0, 1) + " + ";
                 firstCharRemainderHint = Integer.valueOf(remainderString.replace(" + ", ""));
                 sharedPreferences.edit().putInt(FIRSTCHAR_REMAINDER, firstCharRemainderHint).apply();
-            }else {
+            } else {
                 sharedPreferences.edit().putInt(FIRSTCHAR_REMAINDER, 0).apply();
             }
+            // sets the remainder hint for display
             remainderHint = firstCharRemainderHint;
             hintResultTextView.setText(remainderString);
+            // sets the answer status to true and updates the display
             buttonResultTextView.setText(R.string.correct);
             answerProgress.setText(answerString.substring(answerString.length() - 1 - indexCount));
             indexCount++;
+            sharedPreferences.edit().putInt(INDEX_COUNT, indexCount).apply();
+            // sets the next move if the user has not completed guessing the answer
             if(answerString.length() > indexCount) {
                 setMove();
             }
             answerStatus = true;
         } else {
+            // sets the answer status to false and updates the display
             buttonResultTextView.setText(R.string.wrong);
             answerStatus = false;
         }
+        // sets the alpha animation for the results and hint views
         buttonResultTextView.setAlpha(1f);
         hintQuestionTextView.setAlpha(0f);
         hintResultTextView.setAlpha(0f);
@@ -378,52 +375,44 @@ public class PracticeActivity extends AppCompatActivity implements
         AnimatorSet hintSet = new AnimatorSet();
         hintSet.playTogether(hintQuestion, hintResult);
         resultFadeOut.setDuration(1000);
+        // checks if the user has completed guessing the answer
         if(indexCount == answerString.length()) {
+            // sets the alpha animation and text for the result view and gets the equation
             resultFadeOut.setDuration(10000);
             hintSet.setDuration(10000);
             buttonResultTextView.setText(answerString);
             getEquation();
-        }else {
-            if(answerStatus){
+        } else {
+            // shows the button question if the answer is correct
+            if(answerStatus) {
                 buttonQuestion();
             }
         }
         hintSet.start();
         resultFadeOut.start();
     }
-
+    
     @Override
     public void onPointerCaptureChanged(boolean hasCapture) {
-
     }
-
+    
     @Override
     protected void onSaveInstanceState(Bundle bundle) {
-        bundle.putString(ANSWER_PROGRESSION, answerProgress.getText().toString());
-        bundle.putString(EQUATION, equationString);
-        bundle.putString(ANSWER_STRING, answerString);
-        bundle.putInt(INDEX_COUNT, indexCount);
+        // saves the state of the activity to the bundle
+        if(tT) {
+            bundle.putString(ANSWER_PROGRESSION, answerProgress.getText().toString());
+            bundle.putString(ANSWER_STRING, answerString);
+            bundle.putString(EQUATION, equationString);
+            bundle.putInt(INDEX_COUNT, indexCount);
+        }
+        bundle.putInt(LEARN_STEP, learnPage);
         super.onSaveInstanceState(bundle);
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu){
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-        switch (id){
-            case (R.id.learn_menu):
-                NavUtils.navigateUpFromSameTask(this);
-                break;
-            case (R.id.settings_menu):
-                startActivity(new Intent(this, SettingsActivity.class));
-                break;
-            case (R.id.home):
-                NavUtils.navigateUpFromSameTask(this);
-        }
-        return super.onOptionsItemSelected(item);
+    protected void onDestroy(){
+        super.onDestroy();
+        PreferenceManager.getDefaultSharedPreferences(this)
+                .unregisterOnSharedPreferenceChangeListener(this);
     }
 }
