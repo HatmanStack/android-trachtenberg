@@ -1,10 +1,10 @@
 # Trachtenberg Multiplication
 
-An educational app to teach the Trachtenberg method of multiplication, a system of rapid mental calculation.
+An educational app to teach the [Trachtenberg](https://en.wikipedia.org/wiki/Trachtenberg_system) method of multiplication, a system of rapid mental calculation.
 
 ## Demo
 
-Click [here](https://www.youtube.com/watch?v=jQsc5obbgzo) for the Youtube demo. You can download the application from the Google Play Store by clicking [here](https://play.google.com/store/apps/details?id=trachtenberg.math.trachtenberg).
+[Here](https://www.youtube.com/watch?v=jQsc5obbgzo) for the Youtube demo. You can download the application from the Google Play Store [here](https://play.google.com/store/apps/details?id=trachtenberg.math.trachtenberg).
 
 ## Features
 
@@ -12,7 +12,7 @@ Click [here](https://www.youtube.com/watch?v=jQsc5obbgzo) for the Youtube demo. 
 <li>Tutorials that explain the Trachtenberg method in detail</li>
 <li>Practice problems</li>
 <li>Hints that can be turned on or off to help users learn the method</li>
-<li>Ad-free (test ads are served as a Proof Of Concept)</li>
+<li>Ad-free (test ads are served as a Proof Of Concept)git </li>
 </ul>
 
 ## Technologies
