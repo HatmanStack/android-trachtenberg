@@ -1,6 +1,6 @@
 # Trachtenberg Multiplication
 
-An educational app to teach the [Trachtenberg](https://en.wikipedia.org/wiki/Trachtenberg_system) method of multiplication, a system of rapid mental calculation.
+An educational app to teach the [Trachtenberg](https://en.wikipedia.org/wiki/Trachtenberg_system) method of multiplication, a system of rapid mental calculation. Created by Jakow Trachtenberg, a Russian Jew, while in a Nazi concentration camp.
 
 ## Demo
 
@@ -12,7 +12,7 @@ An educational app to teach the [Trachtenberg](https://en.wikipedia.org/wiki/Tra
 <li>Tutorials that explain the Trachtenberg method in detail</li>
 <li>Practice problems</li>
 <li>Hints that can be turned on or off to help users learn the method</li>
-<li>Ad-free (test ads are served as a Proof Of Concept)git </li>
+<li>Ad-free (test ads are served as a Proof Of Concept) </li>
 </ul>
 
 ## Technologies
@@ -32,6 +32,13 @@ An educational app to teach the [Trachtenberg](https://en.wikipedia.org/wiki/Tra
     <td><img src="https://github.com/HatmanStack/android-trachtenberg/blob/main/pics/trachtenberg2.png" alt="Image 3"></td>
   </tr>
 </table>
+
+## Building
+
+- Open Android Studio. From the Welcome screen, select Open an existing Android Studio project.
+- From the Open File or Project window that appears, navigate to and select the android-trachtenberg directory. Click OK.
+- If it asks you to do a Gradle Sync, click OK.
+- With your Android device/emulator connected to your computer and developer mode enabled, click on the green Run arrow in Android Studio.
 
 ## License
 

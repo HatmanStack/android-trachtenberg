@@ -26,6 +26,7 @@ import com.google.android.gms.ads.AdRequest;
 import com.google.android.gms.ads.AdView;
 import com.google.android.gms.ads.MobileAds;
 
+import java.util.Arrays;
 import java.util.Random;
 
 import portfolio.math.trachtenberg.R;
@@ -68,8 +69,7 @@ public class PracticeActivity extends AppCompatActivity implements
         Display d = getWindowManager().getDefaultDisplay();
         
         // Set the content view based on the device rotation
-        int layoutId = (d.getRotation() == Surface.ROTATION_0 || d.getRotation() == Surface.ROTATION_180) ? R.layout.activity_main_rotated : R.layout.activity_main;
-        setContentView(layoutId);
+        setContentView(R.layout.activity_practice);
         
         // Find the necessary views and initialize variables
         button = findViewById(R.id.button);
@@ -82,9 +82,9 @@ public class PracticeActivity extends AppCompatActivity implements
         hintResultTextView = findViewById(R.id.hint_result);
         hintQuestionTextView = findViewById(R.id.hint_question);
         MobileAds.initialize(this, "ca-app-pub-6173744039687391~7033034874");
-        AdView mAdView = findViewById(R.id.adView);
-        AdRequest adRequest = new AdRequest.Builder().build();
-        mAdView.loadAd(adRequest);
+        //AdView mAdView = findViewById(R.id.adView);                       DISABLED ADS
+        //AdRequest adRequest = new AdRequest.Builder().build();            DISABLED ADS
+        //mAdView.loadAd(adRequest);                                        DISABLED ADS
         mRnd = new Random();
         sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
         sharedPreferences.registerOnSharedPreferenceChangeListener(this);
@@ -115,6 +115,30 @@ public class PracticeActivity extends AppCompatActivity implements
             actionBar.setDisplayHomeAsUpEnabled(true);
         }
     }
+
+    // Create the options menu
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        getMenuInflater().inflate(R.menu.menu_main, menu);
+        return true;
+    }
+
+    // Handle menu item clicks
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+        switch (id) {
+            case (R.id.learn_menu):
+                // If the practice menu item is clicked, start the PracticeActivity
+                startActivity(new Intent(this, LearnActivity.class));
+                break;
+            case (R.id.settings_menu):
+                // If the settings menu item is clicked, start the SettingsActivity
+                startActivity(new Intent(this, SettingsActivity.class));
+                break;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+
 
     @Override
     protected void onPause() {
@@ -399,13 +423,12 @@ public class PracticeActivity extends AppCompatActivity implements
     @Override
     protected void onSaveInstanceState(Bundle bundle) {
         // saves the state of the activity to the bundle
-        if(tT) {
-            bundle.putString(ANSWER_PROGRESSION, answerProgress.getText().toString());
-            bundle.putString(ANSWER_STRING, answerString);
-            bundle.putString(EQUATION, equationString);
-            bundle.putInt(INDEX_COUNT, indexCount);
-        }
-        bundle.putInt(LEARN_STEP, learnPage);
+
+        bundle.putString(ANSWER_PROGRESSION, answerProgress.getText().toString());
+        bundle.putString(ANSWER_STRING, answerString);
+        bundle.putString(EQUATION, equationString);
+        bundle.putInt(INDEX_COUNT, indexCount);
+
         super.onSaveInstanceState(bundle);
     }
 

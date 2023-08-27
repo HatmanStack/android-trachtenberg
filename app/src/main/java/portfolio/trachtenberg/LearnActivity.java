@@ -37,14 +37,7 @@ public class LearnActivity extends AppCompatActivity implements
     private static final String LEARN_STEP = "learn_step";
     private static final String INDEX_COUNT = "index_count";
     private static final String EQUATION = "equation";
-    private static final String ANSWER_PROGRESSION = "answer_progression";
-    private static final String HINTHELP = "hinthelp";
-    public static final String HINT = "hint";
     private Button nextButton;
-    private Button button;
-    private Button button1;
-    private Button button2;
-    private Button button3;
     private TextView explanationText;
     private TextView equationText;
     private TextView bottomArrow;
@@ -57,9 +50,7 @@ public class LearnActivity extends AppCompatActivity implements
     private int learnPage;
     private int answerIndex;
     private int indexCount;
-    private int move;
-    private int remainderHint;
-    private int moveCount;
+
     private String answerString;
     private String equationString;
     public SharedPreferences sharedPreferences;
@@ -75,11 +66,7 @@ public class LearnActivity extends AppCompatActivity implements
         // Get the device display
         Display d = getWindowManager().getDefaultDisplay();
         // Set the content view based on the device rotation
-        if (d.getRotation() == Surface.ROTATION_0 || d.getRotation() == Surface.ROTATION_180) {
-            setContentView(R.layout.activity_main_rotated);
-        } else {
-            setContentView(R.layout.activity_main);
-        }
+        setContentView(R.layout.activity_main);
 
         // Find views by ID
         nextButton = findViewById(R.id.next_button);
@@ -94,54 +81,7 @@ public class LearnActivity extends AppCompatActivity implements
         explanationText.setText(getResources().getStringArray(R.array.explanationTextList)[learnPage]);
 
         tT = false;
-        if (findViewById(R.id.button) != null) {
-            // If there is a button, set tT to true and find more views by ID
-            tT = true;
-            button = findViewById(R.id.button);
-            button1 = findViewById(R.id.button2);
-            button2 = findViewById(R.id.button3);
-            button3 = findViewById(R.id.button4);
-            equationTextView = findViewById(R.id.equation_textView);
-            answerProgress = findViewById(R.id.answer_progression);
-            buttonResultTextView = findViewById(R.id.button_result);
-            hintResultTextView = findViewById(R.id.hint_result);
-            hintQuestionTextView = findViewById(R.id.hint_question);
 
-            // Set up the ad view and initialize some variables
-            MobileAds.initialize(this, "ca-app-pub-6173744039687391~7033034874");
-            AdView mAdView = findViewById(R.id.adView);
-            AdRequest adRequest = new AdRequest.Builder().build();
-            mAdView.loadAd(adRequest);
-
-            mRnd = new Random();
-            sharedPreferences = PreferenceManager.getDefaultSharedPreferences(this);
-            sharedPreferences.registerOnSharedPreferenceChangeListener(this);
-        }
-
-        if (savedInstanceState != null) {
-            if (tT) {
-                // If tT is true and there is a saved instance state, retrieve and set some variables
-                indexCount = savedInstanceState.getInt(INDEX_COUNT, 0);
-                equationString = savedInstanceState.getString(EQUATION, "");
-                equationTextView.setText(equationString);
-                answerString = savedInstanceState.getString(ANSWER_STRING);
-                if (answerString != null) {
-                    answerProgress.setText(answerString.substring(answerString.length() - 1 - indexCount));
-                }
-                int remainder = sharedPreferences.getInt(FIRSTCHAR_REMAINDER, 0);
-                if (remainder > 0) {
-                    String s = remainder + " + ";
-                    hintResultTextView.setText(s);
-                }
-                buttonQuestion();
-                setMove();
-            }
-            learnPage = savedInstanceState.getInt(LEARN_STEP, 0);
-            setLearnSteep(2);
-        } else if (tT) {
-            // If tT is true and there is no saved instance state, call the getEquation method
-            getEquation();
-        }
     }
 
     // Create the options menu
@@ -236,5 +176,10 @@ public class LearnActivity extends AppCompatActivity implements
         super.onDestroy();
         PreferenceManager.getDefaultSharedPreferences(this)
                 .unregisterOnSharedPreferenceChangeListener(this);
+    }
+
+    @Override
+    public void onSharedPreferenceChanged(SharedPreferences sharedPreferences, String s) {
+
     }
 }
