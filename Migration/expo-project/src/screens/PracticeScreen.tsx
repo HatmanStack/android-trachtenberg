@@ -1,11 +1,13 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useLayoutEffect } from 'react';
 import { StyleSheet, View } from 'react-native';
-import { Surface, Text } from 'react-native-paper';
+import { Surface, Text, IconButton } from 'react-native-paper';
+import { useNavigation } from '@react-navigation/native';
 import { useAppStore } from '../store/appStore';
 import { AnswerButton } from '../components/AnswerButton';
 import { COLORS, SPACING } from '../theme/constants';
 
 export default function PracticeScreen() {
+  const navigation = useNavigation();
   const currentEquation = useAppStore((state) => state.currentEquation);
   const answerProgress = useAppStore((state) => state.answerProgress);
   const answerChoices = useAppStore((state) => state.answerChoices);
@@ -13,6 +15,19 @@ export default function PracticeScreen() {
   const submitAnswer = useAppStore((state) => state.submitAnswer);
 
   const [feedbackText, setFeedbackText] = useState('');
+
+  // Configure header with Settings navigation button (for stack navigator on mobile)
+  useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <IconButton
+          icon="cog"
+          size={24}
+          onPress={() => navigation.navigate('Settings' as never)}
+        />
+      ),
+    });
+  }, [navigation]);
 
   // Generate first problem on mount
   useEffect(() => {

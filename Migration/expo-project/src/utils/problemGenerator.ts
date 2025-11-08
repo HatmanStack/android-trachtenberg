@@ -13,16 +13,23 @@ export interface PracticeProblem {
  * Generates a random multiplication problem
  * First number: 4 digits (1000-9999)
  * Second number: 3 digits (100-999)
- * Matches Android's operatorEquation() logic (with bug fix)
+ *
+ * BUG FIX: The original Android code (PracticeActivity.java lines 179-182) had
+ * a logic error in the while loop where it swapped the assignment targets:
+ *   - components[1] = mRnd.nextInt(10000); // Should be components[0]
+ *   - components[0] = mRnd.nextInt(1000);  // Should be components[1]
+ * This would regenerate wrong number ranges on retry. This implementation fixes
+ * that bug by correctly regenerating both numbers in their proper ranges.
  */
 export function generateProblem(): PracticeProblem {
   let firstNumber = Math.floor(Math.random() * 10000);
   let secondNumber = Math.floor(Math.random() * 1000);
 
-  // Ensure minimum digit counts (corrected from Android bug)
+  // Ensure minimum digit counts
+  // Android bug fixed: now correctly regenerates both numbers in proper ranges
   while (firstNumber < 1000 || secondNumber < 100) {
-    firstNumber = Math.floor(Math.random() * 10000);
-    secondNumber = Math.floor(Math.random() * 1000);
+    firstNumber = Math.floor(Math.random() * 10000);  // Correct: 4-digit range
+    secondNumber = Math.floor(Math.random() * 1000);   // Correct: 3-digit range
   }
 
   const answer = firstNumber * secondNumber;
