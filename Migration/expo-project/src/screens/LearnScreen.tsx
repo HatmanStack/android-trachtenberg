@@ -1,14 +1,99 @@
 import React from 'react';
-import { StyleSheet, View } from 'react-native';
-import { Surface, Text } from 'react-native-paper';
+import { StyleSheet, View, ScrollView } from 'react-native';
+import { Surface, Text, Button } from 'react-native-paper';
+import { useNavigation } from '@react-navigation/native';
+import { useTutorialNavigation } from '../hooks/useTutorialNavigation';
+import { tutorialSteps, TUTORIAL_EQUATION } from '../data/tutorialContent';
+import { getTutorialHighlightIndices } from '../utils/tutorialHighlighter';
+import { HighlightedText } from '../components/HighlightedText';
+import { COLORS, SPACING } from '../theme/constants';
 
 export default function LearnScreen() {
+  const navigation = useNavigation();
+  const {
+    currentPage,
+    goNext,
+    goPrevious,
+    isLastPage,
+    canGoNext,
+    canGoPrevious,
+  } = useTutorialNavigation();
+
+  const currentStep = tutorialSteps[currentPage];
+  const highlightIndices = getTutorialHighlightIndices(currentStep.answer);
+
+  const handleNext = () => {
+    if (isLastPage) {
+      // Navigate to Practice screen on last page
+      navigation.navigate('Practice' as never);
+    } else {
+      goNext();
+    }
+  };
+
   return (
     <View style={styles.container}>
-      <Surface style={styles.surface}>
-        <Text variant="headlineMedium">Learn Screen</Text>
-        <Text variant="bodyMedium">Tutorial system will be implemented in Phase 2</Text>
-      </Surface>
+      <ScrollView style={styles.scrollView} contentContainerStyle={styles.content}>
+        {/* Explanation Section */}
+        <Surface style={styles.explanationSurface}>
+          <Text variant="bodyLarge" style={styles.explanationText}>
+            {currentStep.explanation}
+          </Text>
+        </Surface>
+
+        {/* Equation Display with Highlighting */}
+        <Surface style={styles.equationSurface}>
+          <HighlightedText
+            text={TUTORIAL_EQUATION}
+            highlightIndices={highlightIndices}
+            highlightColor={COLORS.accent}
+            style={styles.equation}
+          />
+        </Surface>
+
+        {/* Answer/Calculation Steps */}
+        {currentStep.answer !== "" && (
+          <Surface style={styles.answerSurface}>
+            <Text variant="bodyMedium" style={styles.answerText}>
+              {currentStep.answer}
+            </Text>
+          </Surface>
+        )}
+
+        {/* Bottom Arrow (Answer Progress) */}
+        {currentStep.bottomArrow !== "" && (
+          <Surface style={styles.bottomArrowSurface}>
+            <Text variant="headlineLarge" style={styles.bottomArrow}>
+              {currentStep.bottomArrow}
+            </Text>
+          </Surface>
+        )}
+
+        {/* Page Indicator */}
+        <Text variant="bodySmall" style={styles.pageIndicator}>
+          Step {currentPage + 1} of 18
+        </Text>
+      </ScrollView>
+
+      {/* Navigation Buttons */}
+      <View style={styles.buttonContainer}>
+        <Button
+          mode="contained"
+          onPress={goPrevious}
+          disabled={!canGoPrevious}
+          style={styles.button}
+        >
+          Back
+        </Button>
+        <Button
+          mode="contained"
+          onPress={handleNext}
+          disabled={!canGoNext && !isLastPage}
+          style={styles.button}
+        >
+          {isLastPage ? 'Practice' : 'Next'}
+        </Button>
+      </View>
     </View>
   );
 }
@@ -16,13 +101,69 @@ export default function LearnScreen() {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    justifyContent: 'center',
-    alignItems: 'center',
-    padding: 16,
+    backgroundColor: COLORS.background,
   },
-  surface: {
-    padding: 24,
+  scrollView: {
+    flex: 1,
+  },
+  content: {
+    padding: SPACING.md,
+  },
+  explanationSurface: {
+    padding: SPACING.lg,
+    marginBottom: SPACING.md,
+    elevation: 2,
     borderRadius: 8,
+  },
+  explanationText: {
+    lineHeight: 24,
+  },
+  equationSurface: {
+    padding: SPACING.lg,
+    marginBottom: SPACING.md,
+    elevation: 2,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  equation: {
+    fontSize: 32,
+    fontWeight: 'bold',
+    textAlign: 'center',
+  },
+  answerSurface: {
+    padding: SPACING.lg,
+    marginBottom: SPACING.md,
+    elevation: 2,
+    borderRadius: 8,
+  },
+  answerText: {
+    lineHeight: 22,
+  },
+  bottomArrowSurface: {
+    padding: SPACING.lg,
+    marginBottom: SPACING.md,
+    elevation: 2,
+    borderRadius: 8,
+    alignItems: 'center',
+  },
+  bottomArrow: {
+    fontWeight: 'bold',
+    color: COLORS.primary,
+  },
+  pageIndicator: {
+    textAlign: 'center',
+    marginTop: SPACING.sm,
+    color: COLORS.disabled,
+  },
+  buttonContainer: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    padding: SPACING.md,
+    backgroundColor: COLORS.surface,
     elevation: 4,
+  },
+  button: {
+    flex: 1,
+    marginHorizontal: SPACING.sm,
   },
 });
