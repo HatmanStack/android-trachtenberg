@@ -1,5 +1,8 @@
 import { create } from 'zustand';
 import { persistMiddleware } from './middleware/persistMiddleware';
+import { generateProblem, formatEquation } from '../utils/problemGenerator';
+import { generateAnswerChoices, getDigitAtPosition } from '../utils/answerChoices';
+import { validateAnswer } from '../utils/answerValidator';
 
 interface AppState {
   // Settings
@@ -36,7 +39,7 @@ interface AppState {
 
 export const useAppStore = create<AppState>()(
   persistMiddleware(
-    (set) => ({
+    (set, get) => ({
       // Initial state
       hintsEnabled: false,
       hintHelpShown: false,
@@ -61,16 +64,72 @@ export const useAppStore = create<AppState>()(
       setHintHelpShown: (shown) => set({ hintHelpShown: shown }),
       setTutorialPage: (page) => set({ tutorialPage: page }),
 
-      // Practice actions (implementations in Phase 3 Task 2-4)
+      // Practice actions
       generateNewProblem: () => {
-        // Will be implemented in Task 2
-        console.log('generateNewProblem not yet implemented');
+        const problem = generateProblem();
+        const equation = formatEquation(problem);
+        const answer = problem.answer.toString();
+
+        // Get first digit (rightmost) for initial question
+        const firstDigit = getDigitAtPosition(problem.answer, 0);
+        const { choices, correctIndex } = generateAnswerChoices(firstDigit);
+
+        set({
+          currentEquation: equation,
+          currentAnswer: answer,
+          answerProgress: '',
+          indexCount: 0,
+          firstCharRemainder: 0,
+          answerChoices: choices,
+          correctAnswerIndex: correctIndex,
+          move: 0,
+          moveCount: 0,
+          remainderHint: 0,
+        });
       },
 
       submitAnswer: (buttonIndex: number) => {
-        // Will be implemented in Task 4
-        console.log('submitAnswer not yet implemented:', buttonIndex);
-        return { isCorrect: false, isComplete: false };
+        const state = get();
+        const result = validateAnswer(
+          buttonIndex,
+          state.correctAnswerIndex,
+          state.currentAnswer,
+          state.indexCount,
+          state.firstCharRemainder
+        );
+
+        if (!result.isCorrect) {
+          return { isCorrect: false, isComplete: false };
+        }
+
+        // Update state for correct answer
+        set({
+          indexCount: result.newIndexCount,
+          answerProgress: result.newAnswerProgress,
+          firstCharRemainder: result.newRemainder,
+        });
+
+        // If complete, generate new problem after delay
+        if (result.isComplete) {
+          setTimeout(() => {
+            get().generateNewProblem();
+          }, 2000);
+          return { isCorrect: true, isComplete: true };
+        }
+
+        // Generate new choices for next digit
+        const nextDigit = getDigitAtPosition(
+          parseInt(state.currentAnswer, 10),
+          result.newIndexCount
+        );
+        const { choices, correctIndex } = generateAnswerChoices(nextDigit);
+
+        set({
+          answerChoices: choices,
+          correctAnswerIndex: correctIndex,
+        });
+
+        return { isCorrect: true, isComplete: false };
       },
 
       resetPractice: () => {
