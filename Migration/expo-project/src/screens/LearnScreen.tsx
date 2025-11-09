@@ -1,6 +1,6 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { StyleSheet, View, ScrollView } from 'react-native';
-import { Surface, Text, Button } from 'react-native-paper';
+import { Surface, Text, Button, IconButton } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import { useTutorialNavigation } from '../hooks/useTutorialNavigation';
 import { tutorialSteps, TUTORIAL_EQUATION } from '../data/tutorialContent';
@@ -21,6 +21,19 @@ export default function LearnScreen() {
 
   const currentStep = tutorialSteps[currentPage];
   const highlightIndices = getTutorialHighlightIndices(currentStep.answer);
+
+  // Set up navigation header with Settings button
+  useEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <IconButton
+          icon="cog"
+          size={24}
+          onPress={() => navigation.navigate('Settings' as never)}
+        />
+      ),
+    });
+  }, [navigation]);
 
   const handleNext = () => {
     if (isLastPage) {
