@@ -4,6 +4,7 @@ import { NavigationContainer } from '@react-navigation/native';
 import { useTheme } from 'react-native-paper';
 import { TabNavigator } from './TabNavigator';
 import { StackNavigator } from './StackNavigator';
+import { linking } from './linking';
 
 const Navigation: React.FC = () => {
   const theme = useTheme();
@@ -11,6 +12,7 @@ const Navigation: React.FC = () => {
 
   return (
     <NavigationContainer
+      linking={linking}
       theme={{
         dark: false,
         colors: {
