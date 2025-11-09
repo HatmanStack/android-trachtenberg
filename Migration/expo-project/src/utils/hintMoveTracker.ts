@@ -17,14 +17,11 @@
 const MOVES_COUNT = [0, 4, 9, 15, 20, 23, 24];
 
 /**
- * Move indexes array from Android implementation (line 281)
- * Used to determine which digits to multiply at each move
- */
-const MOVES_INDEXES = [2, 2, 2, 1, 2, 1, 0, 2, 1, 0, 1, 0, 0];
-
-/**
  * Lookup table for first string indices for all 24 moves
  * Derived from test expectations and Android behavior
+ *
+ * Note: Original Android MOVES_INDEXES array was [2, 2, 2, 1, 2, 1, 0, 2, 1, 0, 1, 0, 0]
+ * but was insufficient for all 24 moves. This lookup table extends the pattern.
  */
 const FIRST_STRING_INDEX_LOOKUP = [
   2, 2, 2, 1, 2, 2, 1, 2, 1, 0, 2, 1, 0, 1, 0, 2, 1, 0, 1, 0, 2, 1, 0, 0,
