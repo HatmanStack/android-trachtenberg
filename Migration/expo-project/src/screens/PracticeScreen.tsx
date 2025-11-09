@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useLayoutEffect, useRef } from 'react';
+import React, { useEffect, useState, useLayoutEffect, useRef, useCallback } from 'react';
 import { StyleSheet, View, Alert, Animated } from 'react-native';
 import { Surface, Text, IconButton } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
@@ -54,7 +54,7 @@ export default function PracticeScreen() {
   }, [currentEquation, generateNewProblem]);
 
   // Animation functions for feedback and hints
-  const showFeedback = (isComplete: boolean) => {
+  const showFeedback = useCallback((isComplete: boolean) => {
     // Set feedback opacity to 1 immediately
     feedbackOpacity.setValue(1);
 
@@ -67,21 +67,21 @@ export default function PracticeScreen() {
       delay: duration,
       useNativeDriver: true,
     }).start();
-  };
+  }, [feedbackOpacity]);
 
-  const showHints = () => {
+  const showHints = useCallback(() => {
     Animated.timing(hintOpacity, {
       toValue: 1,
       duration: 500,
       useNativeDriver: true,
     }).start();
-  };
+  }, [hintOpacity]);
 
-  const hideHints = () => {
+  const hideHints = useCallback(() => {
     hintOpacity.setValue(0);
-  };
+  }, [hintOpacity]);
 
-  const handleHintPress = () => {
+  const handleHintPress = useCallback(() => {
     // Show help message on first hint click (Android line 291-293)
     if (!hintHelpShown && move === 1) {
       Alert.alert('Hint Help', 'Touch hint to get next step');
@@ -92,9 +92,9 @@ export default function PracticeScreen() {
     if (move < moveCount) {
       nextHint();
     }
-  };
+  }, [hintHelpShown, move, moveCount, setHintHelpShown, nextHint]);
 
-  const handleAnswerPress = (buttonIndex: number) => {
+  const handleAnswerPress = useCallback((buttonIndex: number) => {
     // Enforce hint viewing when hints enabled (Android line 347)
     // Must view at least 9 hints before answering
     if (hintsEnabled && move < 9) {
@@ -121,7 +121,7 @@ export default function PracticeScreen() {
       // Hide hints on wrong answer
       hideHints();
     }
-  };
+  }, [hintsEnabled, move, submitAnswer, showFeedback, showHints, hideHints]);
 
   return (
     <View style={styles.container}>

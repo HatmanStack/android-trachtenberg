@@ -1,4 +1,4 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useCallback } from 'react';
 import { StyleSheet, View, ScrollView, Animated } from 'react-native';
 import { Surface, Text, Button, IconButton } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
@@ -39,7 +39,7 @@ export default function LearnScreen() {
   }, [navigation]);
 
   // Animation for page transitions
-  const changePage = (direction: 'next' | 'previous') => {
+  const changePage = useCallback((direction: 'next' | 'previous') => {
     // Fade out current content
     Animated.timing(contentOpacity, {
       toValue: 0,
@@ -56,16 +56,16 @@ export default function LearnScreen() {
         useNativeDriver: true,
       }).start();
     });
-  };
+  }, [contentOpacity, goNext, goPrevious]);
 
-  const handleNext = () => {
+  const handleNext = useCallback(() => {
     if (isLastPage) {
       // Navigate to Practice screen on last page (no animation)
       navigation.navigate('Practice' as never);
     } else {
       changePage('next');
     }
-  };
+  }, [isLastPage, navigation, changePage]);
 
   return (
     <View style={styles.container}>
