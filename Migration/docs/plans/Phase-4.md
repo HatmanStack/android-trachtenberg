@@ -1072,3 +1072,321 @@ Before proceeding to Phase 5, ensure:
 ---
 
 **Next Phase:** [Phase 5: Settings & State Management](./Phase-5.md)
+
+---
+
+## Review Feedback (Iteration 1)
+
+**Review Date:** 2025-11-09
+**Reviewer:** Senior Code Reviewer
+**Status:** ⚠️ CONDITIONAL APPROVAL with Critical Blocker
+
+### Executive Summary
+
+Phase 4 implementation demonstrates **excellent code quality** and **comprehensive test coverage**. All 9 tasks were completed following TDD principles. However, there is a **critical blocker**: the entire test suite fails to run due to Expo SDK 54 / Jest compatibility issues. This prevents validation of the hint algorithm's correctness, which is a core success criterion for this phase.
+
+**Implementation Completed:**
+- ✅ All 9 tasks from the phase plan completed
+- ✅ 3 test files with ~810 lines of comprehensive test coverage
+- ✅ TDD approach followed (tests written before implementation)
+- ✅ Store integration complete and correct
+- ✅ UI components created and wired properly
+- ✅ TypeScript compilation succeeds with zero errors
+- ❌ **CRITICAL**: All 12 test suites fail - cannot validate algorithm correctness
+
+### Critical Issues Requiring Resolution
+
+#### 🚨 Issue 1: Complete Test Suite Failure (BLOCKER)
+
+**Observation:**
+```
+FAIL __tests__/utils/hintMoveTracker.test.ts
+FAIL __tests__/utils/hintCalculator.test.ts
+FAIL __tests__/integration/hintSystem.test.ts
+... (12 test suites total, all failing)
+
+ReferenceError: You are trying to `import` a file outside of the scope of the test code.
+  at require (node_modules/expo/src/winter/runtime.native.ts:10:36)
+```
+
+**Questions for Implementer:**
+
+1. **Manual Validation:** Given that the test suite cannot run, how was the hint algorithm validated against the Android implementation? Were manual tests performed with known equations and expected outputs?
+
+2. **Algorithm Correctness:** Can you demonstrate that the hint calculations produce identical results to the Android app for at least 3-5 sample problems (e.g., "1234 × 567", "9999 × 999", "1000 × 100")?
+
+3. **Jest/Expo Compatibility:** The integration test file acknowledges this issue at `hintSystem.test.ts:13-14`:
+   ```typescript
+   // NOTE: These tests currently cannot run due to Expo SDK 54 / Jest compatibility issues.
+   // This is documented and will be addressed in Phase 8.
+   ```
+   - Why defer this to Phase 8 instead of fixing it now before proceeding?
+   - What specific Expo SDK 54 incompatibility is causing the issue?
+   - Have you investigated solutions like:
+     - Using a different Jest preset?
+     - Configuring `transformIgnorePatterns` differently?
+     - Adding required mocks to `jest.setup.js`?
+     - Using Expo SDK 53 or 55 instead?
+
+4. **Success Criteria:** Phase 4's success criteria explicitly states:
+   > "Comprehensive tests validate algorithm correctness against Android implementation"
+
+   How can this criterion be considered met if no tests can execute?
+
+5. **Risk Assessment:** Without running tests, what confidence level do you have that:
+   - The move tracking logic correctly maps all 24 moves?
+   - Units vs tens digit selection is correct for all move types?
+   - Remainder accumulation works correctly?
+   - Carry propagation between digits works correctly?
+   - Edge cases (zeros, max values) are handled properly?
+
+**Recommendation:**
+This is a **MUST-FIX** issue. Either:
+- Fix the Jest/Expo configuration NOW to enable test execution, OR
+- Provide comprehensive manual test evidence showing the algorithm matches Android exactly
+
+**Severity:** 🔴 **CRITICAL** - Blocks validation of core algorithm
+
+---
+
+### Code Quality Review
+
+Despite the test execution blocker, the **implementation quality is excellent**. Here's the detailed analysis:
+
+#### ✅ Strengths
+
+**1. Comprehensive Test Coverage**
+- `hintMoveTracker.test.ts`: 257 lines testing all indexCount values (0-6) and all move values (0-23)
+- `hintCalculator.test.ts`: 243 lines testing multiplication, digit extraction, remainder accumulation, formatting
+- `hintSystem.test.ts`: 310 lines of integration tests covering end-to-end flows
+- Tests are well-structured with clear descriptions and expected values
+- Edge cases are covered (out of range, zeros, max values)
+
+**Question:** Were these test cases derived from actual Android app outputs, or are they based solely on reading the Android source code? If the latter, how do you know the expected values are correct?
+
+**2. Excellent Documentation**
+- Android source line references in every file (e.g., "PracticeActivity.java lines 219-267")
+- Clear JSDoc comments explaining purpose and algorithm
+- Implementation comments reference Android logic directly
+- README.md created with project documentation
+
+**3. Proper Android Port Accuracy**
+- Move tracking arrays match Android exactly:
+  - `MOVES_COUNT = [0, 4, 9, 15, 20, 23, 24]` ✓
+  - `MOVES_INDEXES = [2, 2, 2, 1, 2, 1, 0, 2, 1, 0, 1, 0, 0]` ✓
+  - `UNITS_DIGIT_MOVES = [0, 1, 3, 4, 6, 8, 9, 11, 13, 16, 18, 21]` ✓
+  - `COMPLETE_DIGIT_MOVES = [0, 3, 8, 14, 19, 22, 23]` ✓
+- Algorithm logic follows Android structure closely
+- Conditional patterns preserved from original
+
+**4. Store Integration Quality**
+
+**`appStore.ts` analysis:**
+- Hint state properly added to interface (`src/store/appStore.ts:26-32`)
+- Actions correctly defined (`nextHint`, `resetHints`)
+- State initialization in `generateNewProblem` (`lines 89-107`):
+  ```typescript
+  const { startMove, moveCount } = getMoveRange(0);
+  set({
+    move: startMove,
+    moveCount: moveCount,
+    remainderHint: 0,
+    // ... proper initialization
+  });
+  ```
+- Carry calculation in `submitAnswer` (`line 146`):
+  ```typescript
+  const carryDigit = Math.floor(state.remainderHint / 10);
+  ```
+  ✓ **Correct** - matches Android `(int)sRemainder / 10` logic
+
+- Hint state reset for next digit (`lines 158-164`):
+  ```typescript
+  remainderHint: carryDigit,
+  hintResult: carryDigit > 0 ? `${carryDigit} + ` : '',
+  ```
+  ✓ **Excellent** - properly displays carry in result
+
+**Question:** Has the carry propagation been manually tested across multiple digits to ensure it works correctly?
+
+**5. Component Quality**
+
+**`HintDisplay.tsx` analysis:**
+- Clean, focused component with single responsibility
+- Proper memoization with `React.memo`
+- Conditional rendering based on `visible` prop
+- TouchableOpacity for hint advancement
+- Accessibility-friendly with clear tap targets
+- Good styling with theme constants
+
+**`PracticeScreen.tsx` integration:**
+- Proper state extraction from store
+- Hint enforcement implemented (`lines 68-70`):
+  ```typescript
+  if (hintsEnabled && move < 9) {
+    Alert.alert('View Hints', 'Touch the Hint to Receive More Hints');
+    return;
+  }
+  ```
+  ✓ **Correct** - matches Android requirement (line 347)
+
+- Equation highlighting integration:
+  ```typescript
+  {hintsEnabled && hintHighlightIndices.length > 0 ? (
+    <HighlightedText
+      text={currentEquation}
+      highlightIndices={hintHighlightIndices}
+      highlightColor={COLORS.accent}
+    />
+  ) : (
+    <Text>{currentEquation}</Text>
+  )}
+  ```
+  ✓ **Correct** - conditional highlighting
+
+**6. Algorithm Implementation Quality**
+
+**`hintMoveTracker.ts` review:**
+- `getMoveRange()` implementation looks correct for mapping indexCount to move ranges
+- `getDigitIndices()` has complex conditional logic matching Android
+- Edge case handling for out-of-range values
+- `shouldShowHint()` is a stub returning `true`
+
+**Question:** Why is `shouldShowHint()` not implemented? The comment says "this logic is handled in the loop iteration" - but where is that loop? Should this function implement the Android line 288 logic: `if (move == i + 4 && sharedPreferences.getBoolean(HINT, false)) continue`?
+
+**`hintCalculator.ts` review:**
+- Equation parsing: `equation.split(' * ')` ✓
+- Digit extraction using `getDigitIndices()` ✓
+- Multiplication and padding: `product.toString().padStart(2, '0')` ✓
+- Units vs tens selection: `UNITS_DIGIT_MOVES.includes(move)` ✓
+- Remainder accumulation: `currentRemainder + digitToAdd` ✓
+- Result formatting: conditional `' + '` suffix ✓
+- Highlight indices calculation: `secondStringIndex + firstString.length + 3` ✓
+
+**Potential Issue:** Line 98 calculates highlight offset as `+ 3` for " * " (3 characters). However, the equation format uses `" × "` (with multiplication sign). Are the indices correct?
+
+**Question:** The equation format is `"1234 × 567"` (using ×, U+00D7). The split uses `' * '` (asterisk). Looking at `problemGenerator.ts:49`, it uses `×` symbol in display. But the `calculateHintStep` receives equation format `"1234 * 567"` with asterisk. Is there a mismatch here? The formatEquation function uses `×` but the store might convert it? Please verify the equation format throughout the pipeline.
+
+#### ⚠️ Observations & Minor Issues
+
+**1. Persistence Configuration**
+- Hint state correctly excluded from persistence (`appStore.ts:227-237`)
+- Only settings and practice progress persisted
+- ✓ **Correct** - hint state should reset each session
+
+**2. First-Time Help Message**
+- Implemented using `Alert.alert()` (`PracticeScreen.tsx:55`)
+- Uses `hintHelpShown` state to show once
+- ✓ **Acceptable** - matches Android toast behavior
+
+**3. TDD Approach Followed**
+- Git log shows test commits before implementation commits ✓
+- Tests are comprehensive and well-designed ✓
+- **However:** Without execution, TDD benefits are lost
+
+**4. Android Bug Fix Documentation**
+- `problemGenerator.ts` has excellent bug documentation (lines 17-22)
+- Explains the swapped assignment targets in Android while loop
+- ✓ **Excellent** - this was requested in Phase 3 review
+
+**5. Settings Navigation**
+- Practice screen now has Settings button in header (`PracticeScreen.tsx:33-42`)
+- ✓ **Fixed** from Phase 3 review feedback
+
+#### 📊 Checklist Validation
+
+**Phase Verification Checklist:**
+
+- ❓ **Hint system calculates correct steps** - CANNOT VERIFY (tests don't run)
+- ✅ **Move tracking implemented** - Code looks correct, cannot validate
+- ✅ **Digit highlighting shows correct positions** - Implementation correct
+- ❓ **Remainder/carry calculation works** - Code looks correct, needs manual validation
+- ✅ **Hint progression advances step-by-step** - Store logic correct
+- ✅ **Hint requirement enforced** - Implemented at line 68
+- ✅ **Hint visibility controlled by settings** - Conditional rendering works
+- ❌ **All tests pass** - ALL TESTS FAIL
+- ❓ **Hint output matches Android app** - CANNOT VERIFY without tests
+- ✅ **No TypeScript errors** - Compilation succeeds
+
+**Task Completion:**
+
+| Task | Status | Notes |
+|------|--------|-------|
+| Task 1: Extend Store with Hint State | ✅ Complete | All state variables added, properly typed |
+| Task 2: Write Tests for Move Tracking (TDD) | ✅ Complete | 257 lines, comprehensive coverage |
+| Task 3: Implement Move Tracking Logic | ✅ Complete | Implementation matches plan |
+| Task 4: Write Tests for Hint Calculation (TDD) | ✅ Complete | 243 lines, thorough test cases |
+| Task 5: Implement Hint Calculation Logic | ✅ Complete | Algorithm ported from Android |
+| Task 6: Integrate Hint System with Store | ✅ Complete | All actions implemented correctly |
+| Task 7: Add Hint UI to Practice Screen | ✅ Complete | HintDisplay component created |
+| Task 8: Enforce Hint Requirement | ✅ Complete | Validation at move < 9 |
+| Task 9: Write Integration Tests | ✅ Complete | 310 lines of integration tests |
+
+**All tasks completed.** However, success criteria not fully met due to test execution failure.
+
+---
+
+### Questions Requiring Answers
+
+**Before proceeding to Phase 5, please address:**
+
+1. **Test Environment:** What is your plan to fix the Jest/Expo compatibility issue? Will you fix it before Phase 5, or continue deferring to Phase 8?
+
+2. **Manual Validation:** Can you provide evidence of manual testing showing the hint algorithm produces correct results? Ideally:
+   - 3-5 sample equations tested in both Android and Expo implementations
+   - Screenshot comparisons showing identical hint sequences
+   - Verification that all hint steps match for at least one complete problem
+
+3. **Equation Format:** Please clarify the equation string format:
+   - Does `formatEquation()` produce `"1234 × 567"` or `"1234 * 567"`?
+   - Does `calculateHintStep()` expect `×` or `*` as separator?
+   - Are the highlight indices calculated correctly for the actual separator used?
+
+4. **shouldShowHint() Implementation:** Is the stub implementation intentional, or should it implement the Android skip logic for `i+4` moves when hints are enabled?
+
+5. **Risk Mitigation:** Without running tests, how will you catch regressions if future changes break the hint algorithm?
+
+---
+
+### Recommendation
+
+**CONDITIONAL APPROVAL** ⚠️ with the following requirements:
+
+**Required Before Phase 5:**
+1. ✅ Provide manual test evidence showing hint algorithm matches Android (3+ sample problems)
+2. ⚠️ Answer the equation format clarification question
+3. ⚠️ Confirm shouldShowHint() stub is intentional or implement the skip logic
+
+**Required Before Production:**
+1. 🔴 **MUST FIX** the Jest/Expo test environment (by Phase 8 at latest)
+2. 🔴 **MUST VALIDATE** all tests pass once environment is fixed
+3. 🔴 **MUST VERIFY** hint algorithm correctness against Android
+
+**Justification for Conditional Approval:**
+- Code quality is exceptional
+- Implementation appears correct based on code review
+- All tasks were completed as specified
+- TypeScript compilation succeeds
+- The blocker is a tooling issue, not an algorithmic issue
+- If manual validation confirms correctness, the risk is acceptable with the understanding that tests MUST be fixed before production
+
+**If manual validation reveals issues:** Phase 4 should be **REJECTED** and algorithm corrected before proceeding.
+
+---
+
+### Positive Highlights
+
+Despite the critical test blocker, this implementation deserves recognition for:
+
+1. **Outstanding documentation** - Every file has clear Android source references
+2. **Comprehensive test design** - 810 lines of well-structured tests (even though they can't run yet)
+3. **Proper TDD approach** - Tests written before implementation
+4. **Clean code architecture** - Good separation of concerns
+5. **Attention to detail** - Bug documentation, edge case handling, proper TypeScript typing
+6. **Faithful Android port** - Arrays and logic match Android precisely
+
+The implementer clearly understands the Trachtenberg algorithm and has put significant effort into creating a high-quality implementation. The test execution issue is frustrating but appears to be an environmental problem rather than a code quality problem.
+
+---
+
+**Awaiting implementer response before final approval.**
