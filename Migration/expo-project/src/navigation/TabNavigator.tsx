@@ -1,6 +1,7 @@
 import React from 'react';
 import { createMaterialTopTabNavigator } from '@react-navigation/material-top-tabs';
 import { useTheme } from 'react-native-paper';
+import MaterialCommunityIcons from 'react-native-vector-icons/MaterialCommunityIcons';
 import LearnScreen from '@screens/LearnScreen';
 import PracticeScreen from '@screens/PracticeScreen';
 import SettingsScreen from '@screens/SettingsScreen';
@@ -29,9 +30,33 @@ export const TabNavigator: React.FC = () => {
       }}
       initialRouteName="Learn"
     >
-      <Tab.Screen name="Learn" component={LearnScreen} />
-      <Tab.Screen name="Practice" component={PracticeScreen} />
-      <Tab.Screen name="Settings" component={SettingsScreen} />
+      <Tab.Screen
+        name="Learn"
+        component={LearnScreen}
+        options={{
+          tabBarIcon: ({ color }) => (
+            <MaterialCommunityIcons name="school" size={24} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Practice"
+        component={PracticeScreen}
+        options={{
+          tabBarIcon: ({ color }) => (
+            <MaterialCommunityIcons name="pencil" size={24} color={color} />
+          ),
+        }}
+      />
+      <Tab.Screen
+        name="Settings"
+        component={SettingsScreen}
+        options={{
+          tabBarIcon: ({ color }) => (
+            <MaterialCommunityIcons name="cog" size={24} color={color} />
+          ),
+        }}
+      />
     </Tab.Navigator>
   );
 };
