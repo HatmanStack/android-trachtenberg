@@ -2,14 +2,18 @@ import React, { useEffect, useState, useLayoutEffect, useRef, useCallback } from
 import { StyleSheet, View, Alert, Animated } from 'react-native';
 import { Surface, Text, IconButton } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
+import type { StackNavigationProp } from '@react-navigation/stack';
 import { useAppStore } from '../store/appStore';
 import { AnswerButton } from '../components/AnswerButton';
 import { HintDisplay } from '../components/HintDisplay';
 import { HighlightedText } from '../components/HighlightedText';
 import { COLORS, SPACING } from '../theme/constants';
+import type { RootStackParamList } from '../types';
+
+type PracticeScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Practice'>;
 
 export default function PracticeScreen() {
-  const navigation = useNavigation();
+  const navigation = useNavigation<PracticeScreenNavigationProp>();
   const currentEquation = useAppStore((state) => state.currentEquation);
   const answerProgress = useAppStore((state) => state.answerProgress);
   const answerChoices = useAppStore((state) => state.answerChoices);
@@ -40,7 +44,7 @@ export default function PracticeScreen() {
         <IconButton
           icon="cog"
           size={24}
-          onPress={() => navigation.navigate('Settings' as never)}
+          onPress={() => navigation.navigate('Settings')}
         />
       ),
     });
@@ -81,6 +85,15 @@ export default function PracticeScreen() {
     hintOpacity.setValue(0);
   }, [hintOpacity]);
 
+  // Show/hide hints based on hintsEnabled state
+  useEffect(() => {
+    if (hintsEnabled) {
+      showHints();
+    } else {
+      hideHints();
+    }
+  }, [hintsEnabled, showHints, hideHints]);
+
   const handleHintPress = useCallback(() => {
     // Show help message on first hint click (Android line 291-293)
     if (!hintHelpShown && move === 1) {
@@ -118,8 +131,10 @@ export default function PracticeScreen() {
     } else {
       setFeedbackText('Wrong');
       showFeedback(false);
-      // Hide hints on wrong answer
-      hideHints();
+      // Keep hints visible so users can review them
+      if (hintsEnabled) {
+        showHints();
+      }
     }
   }, [hintsEnabled, move, submitAnswer, showFeedback, showHints, hideHints]);
 

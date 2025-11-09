@@ -1,5 +1,6 @@
 import { create } from 'zustand';
-import { persistMiddleware } from './middleware/persistMiddleware';
+import { persist, createJSONStorage } from 'zustand/middleware';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { generateProblem, formatEquation } from '../utils/problemGenerator';
 import { generateAnswerChoices, getDigitAtPosition } from '../utils/answerChoices';
 import { validateAnswer } from '../utils/answerValidator';
@@ -47,7 +48,7 @@ interface AppState {
 }
 
 export const useAppStore = create<AppState>()(
-  persistMiddleware(
+  persist(
     (set, get) => ({
       // Initial state
       hintsEnabled: false,
@@ -189,8 +190,9 @@ export const useAppStore = create<AppState>()(
       nextHint: () => {
         const state = get();
 
-        // Check if we've reached moveCount
-        if (state.move >= state.moveCount) {
+        // Check if we've exceeded moveCount
+        // moveCount is the last valid move index, so we check if move > moveCount
+        if (state.move > state.moveCount) {
           return; // No more hints for this digit
         }
 
@@ -224,6 +226,7 @@ export const useAppStore = create<AppState>()(
     }),
     {
       name: 'trachtenberg-app-storage',
+      storage: createJSONStorage(() => AsyncStorage),
       partialize: (state) => ({
         // Settings
         hintsEnabled: state.hintsEnabled,

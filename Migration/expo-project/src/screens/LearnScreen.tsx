@@ -2,14 +2,18 @@ import React, { useEffect, useRef, useCallback } from 'react';
 import { StyleSheet, View, ScrollView, Animated } from 'react-native';
 import { Surface, Text, Button, IconButton } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
+import type { StackNavigationProp } from '@react-navigation/stack';
 import { useTutorialNavigation } from '../hooks/useTutorialNavigation';
 import { tutorialSteps, TUTORIAL_EQUATION } from '../data/tutorialContent';
 import { getTutorialHighlightIndices } from '../utils/tutorialHighlighter';
 import { HighlightedText } from '../components/HighlightedText';
 import { COLORS, SPACING } from '../theme/constants';
+import type { RootStackParamList } from '../types';
+
+type LearnScreenNavigationProp = StackNavigationProp<RootStackParamList, 'Learn'>;
 
 export default function LearnScreen() {
-  const navigation = useNavigation();
+  const navigation = useNavigation<LearnScreenNavigationProp>();
   const {
     currentPage,
     goNext,
@@ -32,7 +36,7 @@ export default function LearnScreen() {
         <IconButton
           icon="cog"
           size={24}
-          onPress={() => navigation.navigate('Settings' as never)}
+          onPress={() => navigation.navigate('Settings')}
         />
       ),
     });
@@ -61,7 +65,7 @@ export default function LearnScreen() {
   const handleNext = useCallback(() => {
     if (isLastPage) {
       // Navigate to Practice screen on last page (no animation)
-      navigation.navigate('Practice' as never);
+      navigation.navigate('Practice');
     } else {
       changePage('next');
     }

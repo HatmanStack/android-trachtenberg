@@ -208,12 +208,8 @@ describe('Navigation', () => {
       // Via header button (stack) or tab (web)
     });
 
-    test('maintains navigation state during rapid switching', async () => {
-      render(<NavigationWithProviders />);
-
-      // Rapidly switch between screens
-      // Verify no crashes or state corruption
-    });
+    test.todo('maintains navigation state during rapid switching');
+    // TODO: Rapidly switch between screens and verify no crashes or state corruption
   });
 
   describe('Deep Linking', () => {
@@ -233,74 +229,33 @@ describe('Navigation', () => {
       expect(linking.prefixes).toContain('trachtenberg://');
     });
 
-    test('navigates to correct screen from deep link', async () => {
-      // Test that deep link URLs route to correct screens
-      // This would require mocking URL handling
-    });
+    test.todo('navigates to correct screen from deep link');
+    // TODO: Test that deep link URLs route to correct screens (requires mocking URL handling)
   });
 
   describe('Navigation Theme Integration', () => {
-    test('navigation theme matches Paper theme colors', () => {
-      render(<NavigationWithProviders />);
+    test.todo('navigation theme matches Paper theme colors');
+    // TODO: Verify that Navigation theme colors match React Native Paper theme
 
-      // Verify theme colors are applied to navigation
-      // This would check that Navigation theme colors
-      // match React Native Paper theme
-    });
+    test.todo('headers use primary color on mobile');
+    // TODO: Verify header background uses theme primary color on mobile platforms
 
-    test('headers use primary color on mobile', () => {
-      const originalOS = Platform.OS;
-      Object.defineProperty(Platform, 'OS', {
-        get: () => 'ios',
-      });
-
-      render(<NavigationWithProviders />);
-
-      // Verify header background uses theme primary color
-
-      Object.defineProperty(Platform, 'OS', {
-        get: () => originalOS,
-      });
-    });
-
-    test('tab bar uses theme colors on web', () => {
-      const originalOS = Platform.OS;
-      Object.defineProperty(Platform, 'OS', {
-        get: () => 'web',
-      });
-
-      render(<NavigationWithProviders />);
-
-      // Verify tab bar uses theme colors
-
-      Object.defineProperty(Platform, 'OS', {
-        get: () => originalOS,
-      });
-    });
+    test.todo('tab bar uses theme colors on web');
+    // TODO: Verify tab bar uses theme colors on web platform
   });
 
   describe('Edge Cases', () => {
-    test('handles navigation during app state restoration', async () => {
-      // Simulate app being killed and restored
-      // Verify navigation state is maintained
-    });
+    test.todo('handles navigation during app state restoration');
+    // TODO: Simulate app being killed and restored, verify navigation state is maintained
 
-    test('handles rapid back-and-forth navigation', async () => {
-      render(<NavigationWithProviders />);
+    test.todo('handles rapid back-and-forth navigation');
+    // TODO: Rapidly navigate back and forth between screens, verify no crashes or errors
 
-      // Rapidly navigate back and forth between screens
-      // Verify no crashes or errors
-    });
+    test.todo('handles navigation with incomplete data');
+    // TODO: Test navigation when app state is partially loaded, should handle gracefully
 
-    test('handles navigation with incomplete data', async () => {
-      // Test navigation when app state is partially loaded
-      // Should handle gracefully without crashes
-    });
-
-    test('handles invalid deep link URLs', async () => {
-      // Test that invalid URLs don't crash the app
-      // Should fallback to default screen
-    });
+    test.todo('handles invalid deep link URLs');
+    // TODO: Test that invalid URLs don't crash the app, should fallback to default screen
   });
 
   describe('Accessibility', () => {
@@ -319,10 +274,8 @@ describe('Navigation', () => {
       expect(getByText('Trachtenberg Tutorial')).toBeTruthy();
     });
 
-    test('focus management works on navigation', async () => {
-      // When navigating to new screen, focus should move appropriately
-      // This ensures keyboard and screen reader users can navigate
-    });
+    test.todo('focus management works on navigation');
+    // TODO: Verify focus moves appropriately when navigating, ensuring keyboard/screen reader accessibility
   });
 
   describe('Performance', () => {
@@ -335,22 +288,15 @@ describe('Navigation', () => {
       expect(endTime - startTime).toBeLessThan(100);
     });
 
-    test('screen transitions are smooth', async () => {
-      // Test that screen transitions complete without janky behavior
-      // This is more of a manual/visual test but we can verify
-      // that transition callbacks fire
-    });
+    test.todo('screen transitions are smooth');
+    // TODO: Verify screen transitions complete without janky behavior (transition callbacks fire)
   });
 
   describe('State Persistence', () => {
-    test('navigation state persists across reloads', async () => {
-      // Simulate navigation state being saved
-      // Then reload and verify state is restored
-    });
+    test.todo('navigation state persists across reloads');
+    // TODO: Simulate navigation state being saved, then reload and verify state is restored
 
-    test('deep link navigation updates persisted state', async () => {
-      // Navigate via deep link
-      // Verify navigation state is updated and persisted
-    });
+    test.todo('deep link navigation updates persisted state');
+    // TODO: Navigate via deep link, verify navigation state is updated and persisted
   });
 });

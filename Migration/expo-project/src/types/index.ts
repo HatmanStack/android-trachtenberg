@@ -1,5 +1,12 @@
 // Common types used across the app
 
+// Navigation types
+export type RootStackParamList = {
+  Learn: undefined;
+  Practice: undefined;
+  Settings: undefined;
+};
+
 export interface TutorialStep {
   id: number;
   explanation: string;
