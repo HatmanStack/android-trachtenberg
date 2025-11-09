@@ -63,6 +63,13 @@ export default function PracticeScreen() {
   };
 
   const handleAnswerPress = (buttonIndex: number) => {
+    // Enforce hint viewing when hints enabled (Android line 347)
+    // Must view at least 9 hints before answering
+    if (hintsEnabled && move < 9) {
+      Alert.alert('View Hints', 'Touch the Hint to Receive More Hints');
+      return;
+    }
+
     const result = submitAnswer(buttonIndex);
 
     if (result.isCorrect) {
