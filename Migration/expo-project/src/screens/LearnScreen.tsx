@@ -1,5 +1,5 @@
-import React, { useEffect } from 'react';
-import { StyleSheet, View, ScrollView } from 'react-native';
+import React, { useEffect, useRef } from 'react';
+import { StyleSheet, View, ScrollView, Animated } from 'react-native';
 import { Surface, Text, Button, IconButton } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import { useTutorialNavigation } from '../hooks/useTutorialNavigation';
@@ -22,6 +22,9 @@ export default function LearnScreen() {
   const currentStep = tutorialSteps[currentPage];
   const highlightIndices = getTutorialHighlightIndices(currentStep.answer);
 
+  // Animated value for page transitions
+  const contentOpacity = useRef(new Animated.Value(1)).current;
+
   // Set up navigation header with Settings button
   useEffect(() => {
     navigation.setOptions({
@@ -35,20 +38,41 @@ export default function LearnScreen() {
     });
   }, [navigation]);
 
+  // Animation for page transitions
+  const changePage = (direction: 'next' | 'previous') => {
+    // Fade out current content
+    Animated.timing(contentOpacity, {
+      toValue: 0,
+      duration: 150,
+      useNativeDriver: true,
+    }).start(() => {
+      // Change page
+      direction === 'next' ? goNext() : goPrevious();
+
+      // Fade in new content
+      Animated.timing(contentOpacity, {
+        toValue: 1,
+        duration: 150,
+        useNativeDriver: true,
+      }).start();
+    });
+  };
+
   const handleNext = () => {
     if (isLastPage) {
-      // Navigate to Practice screen on last page
+      // Navigate to Practice screen on last page (no animation)
       navigation.navigate('Practice' as never);
     } else {
-      goNext();
+      changePage('next');
     }
   };
 
   return (
     <View style={styles.container}>
       <ScrollView style={styles.scrollView} contentContainerStyle={styles.content}>
-        {/* Explanation Section */}
-        <Surface style={styles.explanationSurface}>
+        <Animated.View style={{ opacity: contentOpacity }}>
+          {/* Explanation Section */}
+          <Surface style={styles.explanationSurface}>
           <Text variant="bodyLarge" style={styles.explanationText}>
             {currentStep.explanation}
           </Text>
@@ -82,17 +106,18 @@ export default function LearnScreen() {
           </Surface>
         )}
 
-        {/* Page Indicator */}
-        <Text variant="bodySmall" style={styles.pageIndicator}>
-          Step {currentPage + 1} of 18
-        </Text>
+          {/* Page Indicator */}
+          <Text variant="bodySmall" style={styles.pageIndicator}>
+            Step {currentPage + 1} of 18
+          </Text>
+        </Animated.View>
       </ScrollView>
 
       {/* Navigation Buttons */}
       <View style={styles.buttonContainer}>
         <Button
           mode="contained"
-          onPress={goPrevious}
+          onPress={() => changePage('previous')}
           disabled={!canGoPrevious}
           style={styles.button}
         >
