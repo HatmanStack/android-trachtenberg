@@ -3,6 +3,8 @@ import { persistMiddleware } from './middleware/persistMiddleware';
 import { generateProblem, formatEquation } from '../utils/problemGenerator';
 import { generateAnswerChoices, getDigitAtPosition } from '../utils/answerChoices';
 import { validateAnswer } from '../utils/answerValidator';
+import { getMoveRange } from '../utils/hintMoveTracker';
+import { calculateHintStep } from '../utils/hintCalculator';
 
 interface AppState {
   // Settings
@@ -84,6 +86,9 @@ export const useAppStore = create<AppState>()(
         const firstDigit = getDigitAtPosition(problem.answer, 0);
         const { choices, correctIndex } = generateAnswerChoices(firstDigit);
 
+        // Initialize hint state for first digit (indexCount = 0)
+        const { startMove, moveCount } = getMoveRange(0);
+
         set({
           currentEquation: equation,
           currentAnswer: answer,
@@ -92,9 +97,9 @@ export const useAppStore = create<AppState>()(
           firstCharRemainder: 0,
           answerChoices: choices,
           correctAnswerIndex: correctIndex,
-          // Initialize hint state (will be properly set in Task 6)
-          move: 0,
-          moveCount: 0,
+          // Hint state initialized for first digit
+          move: startMove,
+          moveCount: moveCount,
           remainderHint: 0,
           hintQuestion: '',
           hintResult: '',
@@ -116,15 +121,14 @@ export const useAppStore = create<AppState>()(
           return { isCorrect: false, isComplete: false };
         }
 
-        // Update state for correct answer
-        set({
-          indexCount: result.newIndexCount,
-          answerProgress: result.newAnswerProgress,
-          firstCharRemainder: result.newRemainder,
-        });
-
         // If complete, generate new problem after delay
         if (result.isComplete) {
+          set({
+            indexCount: result.newIndexCount,
+            answerProgress: result.newAnswerProgress,
+            firstCharRemainder: result.newRemainder,
+          });
+
           setTimeout(() => {
             get().generateNewProblem();
           }, 2000);
@@ -138,9 +142,26 @@ export const useAppStore = create<AppState>()(
         );
         const { choices, correctIndex } = generateAnswerChoices(nextDigit);
 
+        // Calculate carry digit for next position (Android lines 367-375)
+        const carryDigit = Math.floor(state.remainderHint / 10);
+
+        // Get hint state for next digit
+        const { startMove, moveCount } = getMoveRange(result.newIndexCount);
+
+        // Update state for next digit
         set({
+          indexCount: result.newIndexCount,
+          answerProgress: result.newAnswerProgress,
+          firstCharRemainder: result.newRemainder,
           answerChoices: choices,
           correctAnswerIndex: correctIndex,
+          // Reset hints for next digit with carry
+          move: startMove,
+          moveCount: moveCount,
+          remainderHint: carryDigit,
+          hintQuestion: '',
+          hintResult: carryDigit > 0 ? `${carryDigit} + ` : '',
+          hintHighlightIndices: [],
         });
 
         return { isCorrect: true, isComplete: false };
@@ -164,9 +185,30 @@ export const useAppStore = create<AppState>()(
         });
       },
 
-      // Hint actions (stub implementations - will be completed in Task 6)
+      // Hint actions
       nextHint: () => {
-        // TODO: Implement in Task 6
+        const state = get();
+
+        // Check if we've reached moveCount
+        if (state.move >= state.moveCount) {
+          return; // No more hints for this digit
+        }
+
+        // Calculate hint for current move
+        const hintStep = calculateHintStep(
+          state.currentEquation,
+          state.move,
+          state.remainderHint
+        );
+
+        // Update state with hint information
+        set({
+          move: state.move + 1,
+          remainderHint: hintStep.newRemainder,
+          hintQuestion: hintStep.question,
+          hintResult: state.hintResult + hintStep.resultDisplay,
+          hintHighlightIndices: hintStep.highlightIndices,
+        });
       },
 
       resetHints: () => {
