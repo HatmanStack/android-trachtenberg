@@ -1,5 +1,5 @@
-import React, { useEffect, useState, useLayoutEffect } from 'react';
-import { StyleSheet, View, Alert } from 'react-native';
+import React, { useEffect, useState, useLayoutEffect, useRef } from 'react';
+import { StyleSheet, View, Alert, Animated } from 'react-native';
 import { Surface, Text, IconButton } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import { useAppStore } from '../store/appStore';
@@ -29,6 +29,10 @@ export default function PracticeScreen() {
 
   const [feedbackText, setFeedbackText] = useState('');
 
+  // Animated values for feedback and hint display
+  const feedbackOpacity = useRef(new Animated.Value(0)).current;
+  const hintOpacity = useRef(new Animated.Value(0)).current;
+
   // Configure header with Settings navigation button (for stack navigator on mobile)
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -48,6 +52,34 @@ export default function PracticeScreen() {
       generateNewProblem();
     }
   }, [currentEquation, generateNewProblem]);
+
+  // Animation functions for feedback and hints
+  const showFeedback = (isComplete: boolean) => {
+    // Set feedback opacity to 1 immediately
+    feedbackOpacity.setValue(1);
+
+    // Fade out after delay
+    const duration = isComplete ? 10000 : 1000;
+
+    Animated.timing(feedbackOpacity, {
+      toValue: 0,
+      duration,
+      delay: duration,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const showHints = () => {
+    Animated.timing(hintOpacity, {
+      toValue: 1,
+      duration: 500,
+      useNativeDriver: true,
+    }).start();
+  };
+
+  const hideHints = () => {
+    hintOpacity.setValue(0);
+  };
 
   const handleHintPress = () => {
     // Show help message on first hint click (Android line 291-293)
@@ -74,12 +106,21 @@ export default function PracticeScreen() {
 
     if (result.isCorrect) {
       setFeedbackText(result.isComplete ? 'Complete!' : 'Correct!');
+      showFeedback(result.isComplete);
+
+      if (!result.isComplete) {
+        // Show hints for next digit
+        showHints();
+      } else {
+        // Hide hints when problem is complete
+        hideHints();
+      }
     } else {
       setFeedbackText('Wrong');
+      showFeedback(false);
+      // Hide hints on wrong answer
+      hideHints();
     }
-
-    // Clear feedback after delay
-    setTimeout(() => setFeedbackText(''), 1000);
   };
 
   return (
@@ -101,12 +142,14 @@ export default function PracticeScreen() {
       </Surface>
 
       {/* Hint Display */}
-      <HintDisplay
-        question={hintQuestion}
-        result={hintResult}
-        visible={hintsEnabled}
-        onPress={handleHintPress}
-      />
+      <Animated.View style={{ opacity: hintOpacity }}>
+        <HintDisplay
+          question={hintQuestion}
+          result={hintResult}
+          visible={hintsEnabled}
+          onPress={handleHintPress}
+        />
+      </Animated.View>
 
       {/* Answer Progress */}
       <Surface style={styles.progressSurface}>
@@ -117,15 +160,17 @@ export default function PracticeScreen() {
 
       {/* Feedback Text */}
       {feedbackText && (
-        <Text
-          variant="titleLarge"
-          style={[
-            styles.feedback,
-            feedbackText === 'Wrong' ? styles.feedbackWrong : styles.feedbackCorrect,
-          ]}
-        >
-          {feedbackText}
-        </Text>
+        <Animated.View style={{ opacity: feedbackOpacity }}>
+          <Text
+            variant="titleLarge"
+            style={[
+              styles.feedback,
+              feedbackText === 'Wrong' ? styles.feedbackWrong : styles.feedbackCorrect,
+            ]}
+          >
+            {feedbackText}
+          </Text>
+        </Animated.View>
       )}
 
       {/* Answer Buttons */}
