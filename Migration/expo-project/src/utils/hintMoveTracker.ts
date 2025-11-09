@@ -131,20 +131,9 @@ export function getDigitIndices(move: number): DigitIndices {
 }
 
 /**
- * Determines if this move should be displayed as a hint
- * Some moves are skipped based on hint preference (Android line 288)
+ * NOTE: The Android app has skip logic (line 288) for i+4 moves when hints enabled:
+ * `if (move == i + 4 && sharedPreferences.getBoolean(HINT, false)) continue;`
  *
- * @param _move - Current move number (unused for now)
- * @param _previousMove - Previous move number (unused for now)
- * @param _hintsEnabled - Whether hints are enabled (unused for now)
- * @returns Whether to display this hint step
+ * This skip pattern is handled implicitly in our implementation by the move iteration
+ * in the store's nextHint() action, so no separate function is needed.
  */
-export function shouldShowHint(
-  _move: number,
-  _previousMove: number,
-  _hintsEnabled: boolean
-): boolean {
-  // In Android (line 288), moves that match i+4 pattern are skipped when hints enabled
-  // For now, return true (this logic is handled in the loop iteration)
-  return true;
-}

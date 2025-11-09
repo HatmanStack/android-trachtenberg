@@ -51,8 +51,8 @@ export function calculateHintStep(
   currentRemainder: number
 ): HintStepResult {
   // 1. Split equation into first and second numbers (Android lines 221-222)
-  // Equation format: "firstNum * secondNum"
-  const parts = equation.split(' * ');
+  // Equation format: "firstNum × secondNum" (using U+00D7 multiplication sign)
+  const parts = equation.split(' × ');
   const firstString = parts[0];
   const secondString = parts[1];
 
@@ -90,12 +90,13 @@ export function calculateHintStep(
   const resultDisplay = digitToAdd + (isComplete ? '' : ' + ');
 
   // 10. Calculate highlight indices (Android lines 234-238)
-  // The second string index needs offset for " * " in equation
-  // Android uses +7 offset because " * " is between the numbers
-  // In "1234 * 567", if secondString[2] = '7', it's at equation index 7+2 = 9
+  // The second string index needs offset for " × " in equation
+  // Android uses +7 offset because " * " is between the numbers in Android (7 chars for " * 567")
+  // In Expo: "1234 × 567", if secondString[2] = '7', it's at equation index 7+2 = 9
+  // Offset calculation: firstString.length (4) + " × " (3) = 7, then + secondStringIndex
   const highlightIndices = [
     firstStringIndex,
-    secondStringIndex + firstString.length + 3, // +3 for " * "
+    secondStringIndex + firstString.length + 3, // +3 for " × " (space + × + space)
   ];
 
   return {
