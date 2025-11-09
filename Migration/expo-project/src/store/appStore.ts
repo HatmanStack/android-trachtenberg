@@ -21,10 +21,13 @@ interface AppState {
   answerChoices: number[];           // Four button values [0-9]
   correctAnswerIndex: number;        // Which button (0-3) is correct
 
-  // Hint state (Phase 4)
-  move: number;
-  moveCount: number;
-  remainderHint: number;
+  // Hint system state
+  move: number;                    // Current hint step (0-24)
+  moveCount: number;               // Total steps for current digit
+  remainderHint: number;           // Accumulated hint value
+  hintQuestion: string;            // Current hint question (e.g., "3 × 6")
+  hintResult: string;              // Current hint result display
+  hintHighlightIndices: number[];  // Indices to highlight in equation
 
   // Actions
   setHintsEnabled: (enabled: boolean) => void;
@@ -35,6 +38,10 @@ interface AppState {
   generateNewProblem: () => void;
   submitAnswer: (buttonIndex: number) => { isCorrect: boolean; isComplete: boolean };
   resetPractice: () => void;
+
+  // Hint actions
+  nextHint: () => void;            // Advance to next hint step
+  resetHints: () => void;          // Reset hint state for new digit
 }
 
 export const useAppStore = create<AppState>()(
@@ -54,10 +61,13 @@ export const useAppStore = create<AppState>()(
       answerChoices: [],
       correctAnswerIndex: 0,
 
-      // Hint state (Phase 4)
+      // Hint system state (Phase 4)
       move: 0,
       moveCount: 0,
       remainderHint: 0,
+      hintQuestion: '',
+      hintResult: '',
+      hintHighlightIndices: [],
 
       // Actions
       setHintsEnabled: (enabled) => set({ hintsEnabled: enabled }),
@@ -82,9 +92,13 @@ export const useAppStore = create<AppState>()(
           firstCharRemainder: 0,
           answerChoices: choices,
           correctAnswerIndex: correctIndex,
+          // Initialize hint state (will be properly set in Task 6)
           move: 0,
           moveCount: 0,
           remainderHint: 0,
+          hintQuestion: '',
+          hintResult: '',
+          hintHighlightIndices: [],
         });
       },
 
@@ -144,6 +158,25 @@ export const useAppStore = create<AppState>()(
           move: 0,
           moveCount: 0,
           remainderHint: 0,
+          hintQuestion: '',
+          hintResult: '',
+          hintHighlightIndices: [],
+        });
+      },
+
+      // Hint actions (stub implementations - will be completed in Task 6)
+      nextHint: () => {
+        // TODO: Implement in Task 6
+      },
+
+      resetHints: () => {
+        set({
+          move: 0,
+          moveCount: 0,
+          remainderHint: 0,
+          hintQuestion: '',
+          hintResult: '',
+          hintHighlightIndices: [],
         });
       },
     }),
