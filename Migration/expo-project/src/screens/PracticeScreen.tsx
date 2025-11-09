@@ -1,9 +1,11 @@
 import React, { useEffect, useState, useLayoutEffect } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, Alert } from 'react-native';
 import { Surface, Text, IconButton } from 'react-native-paper';
 import { useNavigation } from '@react-navigation/native';
 import { useAppStore } from '../store/appStore';
 import { AnswerButton } from '../components/AnswerButton';
+import { HintDisplay } from '../components/HintDisplay';
+import { HighlightedText } from '../components/HighlightedText';
 import { COLORS, SPACING } from '../theme/constants';
 
 export default function PracticeScreen() {
@@ -13,6 +15,17 @@ export default function PracticeScreen() {
   const answerChoices = useAppStore((state) => state.answerChoices);
   const generateNewProblem = useAppStore((state) => state.generateNewProblem);
   const submitAnswer = useAppStore((state) => state.submitAnswer);
+
+  // Hint state
+  const hintsEnabled = useAppStore((state) => state.hintsEnabled);
+  const hintHelpShown = useAppStore((state) => state.hintHelpShown);
+  const setHintHelpShown = useAppStore((state) => state.setHintHelpShown);
+  const hintQuestion = useAppStore((state) => state.hintQuestion);
+  const hintResult = useAppStore((state) => state.hintResult);
+  const hintHighlightIndices = useAppStore((state) => state.hintHighlightIndices);
+  const move = useAppStore((state) => state.move);
+  const moveCount = useAppStore((state) => state.moveCount);
+  const nextHint = useAppStore((state) => state.nextHint);
 
   const [feedbackText, setFeedbackText] = useState('');
 
@@ -36,6 +49,19 @@ export default function PracticeScreen() {
     }
   }, [currentEquation, generateNewProblem]);
 
+  const handleHintPress = () => {
+    // Show help message on first hint click (Android line 291-293)
+    if (!hintHelpShown && move === 1) {
+      Alert.alert('Hint Help', 'Touch hint to get next step');
+      setHintHelpShown(true);
+    }
+
+    // Advance to next hint if available
+    if (move < moveCount) {
+      nextHint();
+    }
+  };
+
   const handleAnswerPress = (buttonIndex: number) => {
     const result = submitAnswer(buttonIndex);
 
@@ -53,10 +79,27 @@ export default function PracticeScreen() {
     <View style={styles.container}>
       {/* Equation Display */}
       <Surface style={styles.equationSurface}>
-        <Text variant="headlineLarge" style={styles.equation}>
-          {currentEquation || 'Loading...'}
-        </Text>
+        {hintsEnabled && hintHighlightIndices.length > 0 ? (
+          <HighlightedText
+            text={currentEquation || 'Loading...'}
+            highlightIndices={hintHighlightIndices}
+            highlightColor={COLORS.accent}
+            style={styles.equation}
+          />
+        ) : (
+          <Text variant="headlineLarge" style={styles.equation}>
+            {currentEquation || 'Loading...'}
+          </Text>
+        )}
       </Surface>
+
+      {/* Hint Display */}
+      <HintDisplay
+        question={hintQuestion}
+        result={hintResult}
+        visible={hintsEnabled}
+        onPress={handleHintPress}
+      />
 
       {/* Answer Progress */}
       <Surface style={styles.progressSurface}>
